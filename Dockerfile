@@ -17,7 +17,7 @@ RUN yum update -y \
     wget \
     which \
     zlib \
-    yum-util \
+    yum-utils \
  && yum-config-manager --enable codeready-builder \
     libstdc++-static \
     zlib-static \
