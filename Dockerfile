@@ -17,8 +17,6 @@ RUN yum update -y \
     wget \
     which \
     zlib \
- && yum-config-manager --enable ol9_codeready_builder \
- && yum install -y \
     libstdc++-static \
     zlib-static \
     ninja-build
