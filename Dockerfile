@@ -126,8 +126,63 @@ RUN cd /opt \
  && cd eigen3-hdf5 \
  && git checkout 2c782414251e75a2de9b0441c349f5f18fe929a2
 
-ARG GIT_GRPC_TAG=v1.46.3
+RUN gfortran --version \
+ && wget https://github.com/coin-or/Ipopt/archive/refs/tags/releases/3.14.16.tar.gz -O ipopt_src.tgz \
+ && wget https://github.com/coin-or-tools/ThirdParty-Blas/archive/refs/tags/releases/1.4.9.tar.gz -O blas_src.tgz \
+ && wget https://github.com/coin-or-tools/ThirdParty-Lapack/archive/refs/tags/releases/1.6.3.tar.gz -O lapack_src.tgz \
+ && wget https://github.com/coin-or-tools/ThirdParty-Mumps/archive/refs/tags/releases/3.0.8.tar.gz -O mumps_src.tgz \
+ && echo "Blas" \
+ && mkdir -p blas_src \
+ && tar -xf blas_src.tgz --strip 1 -C blas_src \
+ && rm -rf blas_src.tgz \
+ && cd blas_src \
+ && ./get.Blas \
+ && ./configure --help \
+ && ./configure --with-pic --disable-shared --prefix=/opt/CoinIpopt \
+ && make \
+ && make test \
+ && make install \
+ && cd .. \
+ && rm -rf blas_src \
+ && echo "Lapack" \
+ && mkdir -p lapack_src \
+ && tar -xf lapack_src.tgz --strip 1 -C lapack_src \
+ && rm -rf lapack_src.tgz \
+ && cd lapack_src \
+ && ./get.Lapack \
+ && ./configure --with-pic --disable-shared --prefix=/opt/CoinIpopt \
+ && make \
+ && make test \
+ && make install \
+ && cd .. \
+ && rm -rf lapack_src \
+ && cp /opt/CoinIpopt/lib/pkgconfig/coinblas.pc /opt/CoinIpopt/lib/pkgconfig/blas.pc \
+ && cp /opt/CoinIpopt/lib/pkgconfig/coinlapack.pc /opt/CoinIpopt/lib/pkgconfig/lapack.pc \
+ && echo "Mumps" \
+ && mkdir -p mumps_src \
+ && tar -xf mumps_src.tgz --strip 1 -C mumps_src \
+ && rm -rf mumps_src.tgz \
+ && cd mumps_src \
+ && ./get.Mumps \
+ && ./configure --with-pic --disable-shared --prefix=/opt/CoinIpopt \
+ && make \
+ && make test \
+ && make install \
+ && cd .. \
+ && rm -rf mumps_src \
+ && echo "Ipopt" \
+ && mkdir -p ipopt_src \
+ && tar -xf ipopt_src.tgz --strip 1 -C ipopt_src \
+ && rm -rf ipopt_src.tgz \
+ && cd ipopt_src \
+ && ./configure --with-pic --disable-shared --prefix=/opt/CoinIpopt \
+ && make \
+ && make test \
+ && make install \
+ && cd .. \
+ && rm -rf ipopt_src # buildkit
 
+ARG GIT_GRPC_TAG=v1.50.1
 RUN git clone --recurse-submodules -b ${GIT_GRPC_TAG} https://github.com/grpc/grpc grpc_src \
  && cd grpc_src \
  && mkdir -p cmake/build \
@@ -147,3 +202,22 @@ RUN git clone --recurse-submodules -b ${GIT_GRPC_TAG} https://github.com/grpc/gr
  && make install \
  && cd ../../.. \
  && rm -rf grpc_src
+
+ENV MATHTOOLBOX_INSTALL=/usr/local/mathtoolbox
+RUN git clone --recursive https://github.com/yuki-koyama/mathtoolbox \
+ && cd mathtoolbox \
+ && git checkout edc26c9680750e022fd41cdee5ae942784a5aff4 \
+ && cd .. \
+ && mkdir -p mathtoolbox_build \
+ && cd mathtoolbox_build \
+ && cmake -G "Unix Makefiles" \
+      -D CMAKE_BUILD_TYPE:STRING=Release \
+      -D CMAKE_INSTALL_PREFIX:PATH=${MATHTOOLBOX_INSTALL} \
+      -D BUILD_SHARED_LIBS:BOOL=OFF \
+      -D BUILD_TESTING:BOOL=OFF \
+      -D CMAKE_C_FLAGS="-fPIC" \
+      -D CMAKE_CXX_FLAGS="-fPIC" \
+      ../mathtoolbox \
+ && make install \
+ && cd .. \
+ && rm -rf mathtoolbox mathtoolbox_build
