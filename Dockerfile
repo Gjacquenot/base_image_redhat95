@@ -2,35 +2,34 @@ FROM redhat/ubi9:9.5-1732804088
 
 ENV TZ=Europe/Paris
 
-RUN apt-get update \
- && apt-get install -y --no-install-recommends \
-    ca-certificates \
-    cmake \
-    curl \
-    git \
-    gpg-agent \
-    g++ \
+RUN yum update -y \
+ && yum install -y \
+    bzip2 \
+    bzip2-devel \
+    file \
     gcc \
-    gfortran \
-    libblas3 \
-    liblapack3 \
-    libbz2-dev \
+    gcc-c++ \
+    gcc-gfortran \
+    git \
     make \
-    ninja-build \
-    pkg-config \
-    software-properties-common \
+    patch \
     unzip \
     wget \
-    coinor-libipopt-dev \
- && rm -rf /var/lib/apt/lists/*
+    which \
+    zlib \
+ && yum-config-manager --enable ol9_codeready_builder \
+ && yum install -y \
+    libstdc++-static \
+    zlib-static \
+    ninja-build
 
 RUN  wget --quiet http://sourceforge.net/projects/boost/files/boost/1.60.0/boost_1_60_0.tar.gz -O boost_src.tar.gz \
  && mkdir -p boost_src \
  && tar -xzf boost_src.tar.gz --strip 1 -C boost_src \
  && rm -rf boost_src.tar.gz \
- &&  cd boost_src \
- &&  ./bootstrap.sh \
- &&  ./b2 cxxflags=-fPIC --without-mpi --without-python link=static threading=single threading=multi --layout=tagged --prefix=/opt/boost install > /dev/null \
+ && cd boost_src \
+ && ./bootstrap.sh \
+ && ./b2 cxxflags=-fPIC --without-mpi --without-python link=static threading=single threading=multi --layout=tagged --prefix=/opt/boost install > /dev/null \
  && cd .. \
  && rm -rf boost_src
 
