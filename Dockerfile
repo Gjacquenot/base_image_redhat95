@@ -40,12 +40,26 @@ RUN git clone https://github.com/boostorg/geometry \
  && cd .. \
  && rm -rf geometry
 
-RUN wget https://github.com/eigenteam/eigen-git-mirror/archive/3.3.5.tar.gz -O eigen.tgz \
+RUN mkdir -p /opt/cmake \
+ && wget https://cmake.org/files/v3.19/cmake-3.19.2-Linux-x86_64.sh -O cmake.sh \
+ && sh ./cmake.sh --exclude-subdir --prefix=/opt/cmake \
+ && rm -rf cmake.sh
+
+ENV PATH=/opt/cmake/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+RUN wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz -O eigen.tgz \
  && mkdir -p /opt/eigen \
  && tar -xzf eigen.tgz --strip 1 -C /opt/eigen \
  && rm -rf eigen.tgz
 
-RUN wget https://github.com/jbeder/yaml-cpp/archive/release-0.3.0.tar.gz -O yaml_cpp.tgz \
+RUN cd /opt \
+ && mkdir /opt/eigen3_built \
+ && cd /opt/eigen3_built \
+ && cmake ../eigen \
+ && make install \
+ && rm -rf /opt/eigen3_built
+
+RUN wget https://github.com/jbeder/yaml-cpp/archive/refs/tags/0.8.0.tar.gz -O yaml_cpp.tgz \
  && mkdir -p /opt/yaml_cpp \
  && tar -xzf yaml_cpp.tgz --strip 1 -C /opt/yaml_cpp \
  && rm -rf yaml_cpp.tgz
