@@ -17,13 +17,23 @@ RUN yum update -y \
     wget \
     which \
     zlib \
-    yum-utils \
- && subscription-manager repos --enable codeready-builder-for-rhel-9-$(arch)-rpms \
- && yum update -y \
- && yum install -y \
-    libstdc++-static \
-    zlib-static \
-    ninja-build
+    yum-utils
+
+# && subscription-manager repos --enable codeready-builder-for-rhel-9-$(arch)-rpms \
+# && yum update -y \
+# && yum install -y \
+#    libstdc++-static \
+#    zlib-static \
+#    ninja-build
+# Fail because ninjabuild depends on libstdc++-devel
+# curl https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/codeready-builder/os/Packages/l/libstdc++-devel-11.5.0-2.el9.x86_64.rpm -o libstdcstatic.rpm
+#RUN curl https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/codeready-builder/os/Packages/l/libstdc++-static-11.5.0-2.el9.x86_64.rpm -o libstdcstatic.rpm \
+# && rpm -ivh libstdcstatic.rpm \
+# && rm -f libstdcstatic.rpm
+## Fail because ninjabuild depends on vim and emacs
+# RUN curl https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/codeready-builder/os/Packages/n/ninja-build-1.10.2-6.el9.x86_64.rpm -o ninjabuild.rpm \
+# && rpm -ivh ninjabuild.rpm \
+# && rm -f ninjabuild.rpm
 
 RUN wget --quiet http://sourceforge.net/projects/boost/files/boost/1.60.0/boost_1_60_0.tar.gz -O boost_src.tar.gz \
  && mkdir -p boost_src \
